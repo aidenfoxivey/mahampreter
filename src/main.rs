@@ -80,23 +80,23 @@ fn parse_op(input: &str) -> IResult<&str, LispExpr> {
     )(input)
 }
 
-fn eval_op(operation: LispOp, operands: Vec<u32>) -> Option<f32> {
+fn eval_op(operation: LispOp, operands: Vec<i64>) -> Option<i64> {
     return match operation {
         LispOp::Div => {
             if operands.len() != 2 || operands[1] == 0 {
                 None
             } else {
-                Some((operands[0] / operands[1]) as f32)
+                Some((operands[0] / operands[1]) as i64)
             }
         }
         LispOp::Mul => {
-            let mut acc: f32 = 1.0;
+            let mut acc = 1;
 
             for operand in operands {
                 if operand == 0 {
-                    return Some(0.0);
+                    return Some(0);
                 } else {
-                    acc *= operand as f32;
+                    acc *= operand;
                 }
             }
             Some(acc)
@@ -105,15 +105,15 @@ fn eval_op(operation: LispOp, operands: Vec<u32>) -> Option<f32> {
             if operands.len() != 2 {
                 None
             } else {
-                Some((operands[0] % operands[1]) as f32)
+                Some(operands[0] % operands[1])
             }
         }
-        LispOp::Add => Some(operands.iter().sum::<u32>() as f32),
+        LispOp::Add => Some(operands.iter().sum::<i64>()),
         LispOp::Sub => {
             if operands.len() != 2 {
                 None
             } else {
-                Some((operands[0] - operands[1]) as f32)
+                Some(operands[0] - operands[1])
             }
         }
     };
@@ -126,7 +126,27 @@ fn evaluate(expression: LispExpr) -> i64 {
         LispExpr::Operation(_) => todo!(),
         LispExpr::Integer(value) => value,
         LispExpr::Float(_) => todo!(),
-        LispExpr::List(list) => 43,
+        LispExpr::List(list) => {
+            let iter = list.iter();
+            let first_expr = list[0].clone();
+
+            let iter = iter.skip(1); // skip the operand
+            let mut operands: Vec<i64> = vec![];
+
+            for expr in iter {
+                operands.push(evaluate(expr.clone()));
+            }
+
+            let op;
+
+            match first_expr {
+                LispExpr::Operation(op_type) => {op = op_type},
+                _ => todo!(),
+            } 
+
+            eval_op(op, operands).unwrap()
+
+        },
     }
 }
 
@@ -144,8 +164,6 @@ fn main() {
                 rl.add_history_entry(line.as_str()).unwrap();
 
                 let result = parse_expr(line.as_str());
-
-                println!("{:?}", result);
 
                 match result {
                     Ok((_, expr)) => {
