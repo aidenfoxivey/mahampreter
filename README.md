@@ -1,10 +1,7 @@
 # Mahampreter: A Minimalistic LISP Interpreter
 
 Welcome to Mahampreter, a lightweight and user-friendly LISP interpreter
-designed for educational purposes and rapid prototyping. The primary goal of
-Mahampreter is to provide a simple yet powerful environment for those who are
-eager to learn the fundamentals of LISP programming language and its
-concepts.
+designed for educational purposes. (Both mine and yours.)
 
 ## Features
 - Minimalistic and easy-to-understand Rust codebase

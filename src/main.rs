@@ -52,7 +52,7 @@ fn parse_integer(input: &str) -> IResult<&str, LispExpr> {
 }
 
 fn parse_expr(input: &str) -> IResult<&str, LispExpr> {
-    alt((parse_integer, parse_op, parse_symbol, parse_list))(input)
+    alt((parse_float, parse_integer, parse_op, parse_symbol, parse_list))(input)
 }
 
 fn parse_list(input: &str) -> IResult<&str, LispExpr> {
@@ -80,21 +80,34 @@ fn parse_op(input: &str) -> IResult<&str, LispExpr> {
     )(input)
 }
 
-fn eval_op(operation: LispOp, operands: Vec<i64>) -> Option<i64> {
+fn eval_op(operation: LispOp, expressions: Vec<LispExpr>) -> Option<f64> {
+
+    let mut operands = vec![];
+
+    for expr in expressions {
+        match expr {
+            LispExpr::Symbol(_) => todo!(),
+            LispExpr::Operation(_) => todo!(),
+            LispExpr::Integer(value) => operands.push(value as f64),
+            LispExpr::Float(value) => operands.push(value),
+            LispExpr::List(_) => todo!(),
+        }
+    }
+
     return match operation {
         LispOp::Div => {
-            if operands.len() != 2 || operands[1] == 0 {
+            if operands.len() != 2 || operands[1] == 0.0 {
                 None
             } else {
-                Some((operands[0] / operands[1]) as i64)
+                Some(((operands[0] / operands[1]) as i64) as f64)
             }
         }
         LispOp::Mul => {
-            let mut acc = 1;
+            let mut acc = 1.0;
 
             for operand in operands {
-                if operand == 0 {
-                    return Some(0);
+                if operand == 0.0 {
+                    return Some(0.0);
                 } else {
                     acc *= operand;
                 }
@@ -108,7 +121,7 @@ fn eval_op(operation: LispOp, operands: Vec<i64>) -> Option<i64> {
                 Some(operands[0] % operands[1])
             }
         }
-        LispOp::Add => Some(operands.iter().sum::<i64>()),
+        LispOp::Add => Some(operands.iter().sum::<f64>()),
         LispOp::Sub => {
             if operands.len() != 2 {
                 None
@@ -119,32 +132,42 @@ fn eval_op(operation: LispOp, operands: Vec<i64>) -> Option<i64> {
     };
 }
 
-fn evaluate(expression: LispExpr) -> i64 {
+fn evaluate(expression: LispExpr) -> LispExpr {
     match expression {
-        // evaluate the function from here
         LispExpr::Symbol(_) => todo!(),
-        LispExpr::Operation(_) => todo!(),
-        LispExpr::Integer(value) => value,
-        LispExpr::Float(_) => todo!(),
+        LispExpr::Operation(_) => expression,
+        LispExpr::Integer(_) => expression,
+        LispExpr::Float(_) => expression,
         LispExpr::List(list) => {
+
+            if list.len() == 0 {
+                return LispExpr::Symbol("NIL".to_string());
+            }
+
             let iter = list.iter();
             let first_expr = list[0].clone();
 
             let iter = iter.skip(1); // skip the operand
-            let mut operands: Vec<i64> = vec![];
+            let mut operands: Vec<LispExpr> = vec![];
 
             for expr in iter {
-                operands.push(evaluate(expr.clone()));
+                match evaluate(expr.clone()) {
+                    LispExpr::Symbol(_) => todo!(),
+                    LispExpr::Operation(_) => todo!(),
+                    LispExpr::Integer(value) => operands.push(LispExpr::Integer(value)),
+                    LispExpr::Float(value) => operands.push(LispExpr::Float(value)),
+                    LispExpr::List(_) => todo!(),
+                }
             }
 
-            let op;
+            let op: LispOp;
 
             match first_expr {
                 LispExpr::Operation(op_type) => {op = op_type},
                 _ => todo!(),
             } 
 
-            eval_op(op, operands).unwrap()
+            LispExpr::Float(eval_op(op, operands).unwrap())
 
         },
     }
@@ -152,11 +175,11 @@ fn evaluate(expression: LispExpr) -> i64 {
 
 fn main() {
     println!("Mahampreter v0.5");
+    println!("Press Ctrl-C to exit the REPL.\n");
     let mut rl = DefaultEditor::new().unwrap();
-    let mut guess = String::new();
 
     loop {
-        let prompt = format!("{}", Style::new().bold().paint("> "));
+        let prompt = format!("😺 {}", Style::new().bold().paint("> "));
         let readline = rl.readline(&prompt);
 
         match readline {
@@ -167,7 +190,7 @@ fn main() {
 
                 match result {
                     Ok((_, expr)) => {
-                        println!("{}", evaluate(expr));
+                        println!("{:?}", evaluate(expr));
                     }
                     Err(error) => println!("{:?}", error),
                 }
@@ -190,7 +213,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_expr, LispExpr::*, LispOp::*};
+    use crate::{parse_expr, evaluate, LispExpr, LispExpr::*, LispOp::*};
 
     #[test]
     fn double_numbers_list() {
@@ -198,7 +221,7 @@ mod tests {
 
         assert_eq!(
             parse_expr(result),
-            Ok(("", List([Operation(Add), Integer(1), Integer(2)].to_vec())))
+            Ok(("", List([Operation(Add), Float(1.0), Float(2.0)].to_vec())))
         );
     }
 
@@ -210,5 +233,27 @@ mod tests {
             parse_expr(result),
             Ok(("", List([].to_vec())))
         );
+    }
+
+    #[test]
+    fn nested_execution() {
+        let input = "(+ 1 2 (+ 1 1 1))"; 
+        let (_, parsed) = parse_expr(input).unwrap();
+
+        assert_eq!(evaluate(parsed), LispExpr::Float(6.0));
+    }
+
+    #[test]
+    fn floating_point_addition() {
+        let input = "(+ 1.0 2.0)";
+        let (_, parsed) = parse_expr(input).unwrap();
+        assert_eq!(evaluate(parsed), LispExpr::Float(3.0));
+    } 
+
+    #[test]
+    fn nil_case() {
+        let input = "()";
+        let (_, parsed) = parse_expr(input).unwrap();
+        assert_eq!(evaluate(parsed), LispExpr::Symbol("NIL".to_string()));
     }
 }
