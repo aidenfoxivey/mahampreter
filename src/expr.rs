@@ -1,6 +1,40 @@
 pub mod expr {
     use std::fmt;
 
+
+    #[derive(Debug, PartialEq, Eq)]
+    enum ValueErr {
+        UnknownBase,
+        OutOfBounds,
+        UnknownFunction(String),
+    }
+
+    impl fmt::Display for ValueErr {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                ValueErr::UnknownBase => write!(f, "Only decimal, octal (#o), and binary (#b) are supported."),
+                ValueErr::OutOfBounds => write!(f, "Number is too large to be supported."),
+                ValueErr::UnknownFunction(string) => write!(f, "Unknown function: {}\n Have you forgotten something?", string),
+            }
+        }
+    } 
+
+    #[derive(Debug, PartialEq, Eq)]
+    enum ArithErr {
+        DivideByZero,
+        BadOperator(char),
+    }
+
+
+    impl fmt::Display for ArithErr {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                ArithErr::DivideByZero => write!(f, "Illegal divide by zero operation."),
+                ArithErr::BadOperator(ch) => write!(f, "{} is not a valid operator.", ch),
+            }
+        }
+    } 
+
     #[derive(Debug, PartialEq, Clone)]
     pub enum SchemeOp {
         Div,
@@ -8,6 +42,11 @@ pub mod expr {
         Add,
         Sub,
         Mod,
+        Gt,
+        Lt,
+        Leq,
+        Geq,
+        Eq,
     }
 
     fn eval_op(operation: SchemeOp, expressions: Vec<SchemeExpr>) -> Option<f64> {
@@ -58,6 +97,8 @@ pub mod expr {
                     Some(operands[0] - operands[1])
                 }
             }
+            SchemeOp::Gt => todo!(),
+            _ => todo!(),
         };
     }
 

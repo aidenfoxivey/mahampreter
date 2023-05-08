@@ -2,13 +2,11 @@ pub mod expr;
 pub mod parser;
 pub mod test;
 
-use crate::expr::expr::evaluate;
 use ansi_term::Style;
 use clap::Parser;
 use rustyline::{error::ReadlineError, DefaultEditor};
 
-
-use crate::expr::expr::{SchemeExpr, SchemeOp};
+use crate::expr::expr::{evaluate, SchemeExpr, SchemeOp};
 use crate::parser::parser::parse_expr;
 
 #[derive(Parser, Debug)]
@@ -33,14 +31,6 @@ struct Args {
     #[arg(short = 'e', long = "evaluate", value_name = "EXPRESSION")]
     expr: Option<String>,
 }
-
-// #[derive(Debug, Eq, PartialEq)]
-// enum MathError {
-//     DivideByZero,
-//     TooLarge,
-// }
-
-// enum SchemeError {}
 
 fn main() {
     let args = Args::parse();

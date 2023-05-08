@@ -22,7 +22,6 @@ pub mod parser {
         map(double, SchemeExpr::Float)(input)
     }
 
-    // TODO: add support for negative integers too
     fn parse_integer(input: &str) -> IResult<&str, SchemeExpr> {
         map(i64, SchemeExpr::Integer)(input)
     }
@@ -50,14 +49,30 @@ pub mod parser {
 
     fn parse_op(input: &str) -> IResult<&str, SchemeExpr> {
         map(
-            recognize(alt((tag("*"), tag("/"), tag("+"), tag("-"), tag("%")))),
+            recognize(alt((
+                tag("*"),
+                tag("/"),
+                tag("+"),
+                tag("-"),
+                tag("%"),
+                tag(">"),
+                tag("<"),
+                tag("<="),
+                tag(">="),
+                tag("="),
+            ))),
             |s: &str| match s {
                 "*" => SchemeExpr::Operation(SchemeOp::Mul),
                 "/" => SchemeExpr::Operation(SchemeOp::Div),
                 "+" => SchemeExpr::Operation(SchemeOp::Add),
                 "-" => SchemeExpr::Operation(SchemeOp::Sub),
                 "%" => SchemeExpr::Operation(SchemeOp::Mod),
-                _ => panic!("Incorrect operator parsing."),
+                ">" => SchemeExpr::Operation(SchemeOp::Gt),
+                "<" => SchemeExpr::Operation(SchemeOp::Lt),
+                "<=" => SchemeExpr::Operation(SchemeOp::Leq),
+                ">=" => SchemeExpr::Operation(SchemeOp::Geq),
+                "=" => SchemeExpr::Operation(SchemeOp::Eq),
+                _ => panic!("Invalid operator: {}", s),
             },
         )(input)
     }
