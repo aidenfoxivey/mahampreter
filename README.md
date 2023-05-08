@@ -1,22 +1,31 @@
-# Mahampreter: A Minimalistic LISP Interpreter
+# mahampreter
 
-Welcome to Mahampreter, a lightweight and user-friendly LISP interpreter
-designed for educational purposes. (Both mine and yours.)
+Welcome to mahampreter, a lightweight and user-friendly Scheme interpreter
+designed for educational purposes.
+
+This, for me at least, is *baby's first interpreter*. I have zero formal training in building 
+interpreters and I have a questionable understanding of computer science. Please do
+email me at aidenfoxivey@disroot.org if you have criticism. Alternatively, open an issue or 
+"toot" me [on Mastodon](https://mastodon.social/@aidenfoxivey). Sorry, it bothers me too!
+
+More specifically, mahampreter implements the version of Scheme R7RS-small standard,
+which can be most thoroughly understood through reading [the formal specification][1].
 
 ## Features
-- Minimalistic and easy-to-understand Rust codebase
-- Support for fundamental LISP operations and data structures
-- Interactive REPL (Read-Eval-Print Loop) for quick experimentation
-- Extensible and customizable design for further development
-- Available anywhere Rust is (MacOS, Linux, Windows, FreeBSD, etc.)
+- [ ] Full support for Scheme R7RS-small standard (not yet)
+- [x] Interactive REPL (Read-Eval-Print Loop) for quick experimentation
+- [x] Fancy shmancy cat face emoji prompt!
 
 ## Getting Started
 
 ### Prerequisites
-To get started with Mahampreter, you'll need to have Rust installed.
+To get started with mahampreter, you'll need to have Rust installed.
+If you're unaware of how to install Rust, [go here][2]. If you're unwilling
+to install Rust, then maybe ask a trusted computer wizard friend to run this code
+for you? That's my best advice at least.
 
-### Building Mahampreter
-To build Mahampreter, follow these steps:
+### Building mahampreter
+To build mahampreter, follow these steps in your local terminal:
 
 1. Clone the repository:
 ```
@@ -34,20 +43,18 @@ cargo build --release
 ```
 It will automatically pull all of the dependencies.
 
-### Running Mahampreter
-To start the Mahampreter REPL, simply execute the compiled binary:
+### Running mahampreter
+To start the mahampreter REPL, simply execute the compiled binary:
 
 ```
 ./mahampreter
 ```
 
-Now you can start experimenting with LISP expressions!
-
 ## Example Usage
-Here's a simple example of using Mahampreter to perform basic arithmetic operations:
+Here's a simple example of using mahampreter to perform basic arithmetic:
 
 ```
-> (+ 1 2 3)
+> (+ 1 (2 3))
 6
 > (* 2 3)
 6
@@ -55,7 +62,7 @@ Here's a simple example of using Mahampreter to perform basic arithmetic operati
 3
 ```
 
-You can also use Mahampreter to define functions and work with more complex expressions:
+You can also use mahampreter to define functions and work with more complex expressions:
 
 ```
 > (define square (lambda (x) (* x x)))
@@ -67,4 +74,8 @@ You can also use Mahampreter to define functions and work with more complex expr
 ```
 
 ## License
-Mahampreter is released under the MIT License. For more information, please see the [LICENSE](LICENSE) file.
+mahampreter is released under the MIT License. For more information, please see the [LICENSE](LICENSE) file.
+
+
+[1]: https://small.r7rs.org/attachment/r7rs.pdf
+[2]: https://www.rust-lang.org/learn/get-started
